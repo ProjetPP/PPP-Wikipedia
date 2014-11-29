@@ -4,7 +4,7 @@ namespace PPP\Wikipedia\TreeSimplifier;
 use Mediawiki\Api\MediawikiApi;
 
 /**
- * @covers PPP\Wikipedia\TreeSimplifier\WikibaseNodeSimplifierFactory
+ * @covers PPP\Wikipedia\TreeSimplifier\WikipediaNodeSimplifierFactory
  *
  * @licence GPLv2+
  * @author Thomas Pellissier Tanon
