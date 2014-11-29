@@ -50,7 +50,10 @@ class WikipediaRequestHandlerTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(new ModuleResponse(
 					'fr',
-					new ResourceListNode(array(new StringResourceNode('Léon Leroy de la Brière (14 janvier 1845 - 12 septembre 1899) est un écrivain politique français de la fin du XIXe siècle.')))
+					new StringResourceNode('Léon Leroy de la Brière (14 janvier 1845 - 12 septembre 1899) est un écrivain politique français de la fin du XIXe siècle.'),
+					array(
+						'relevance' => 1
+					)
 				)),
 			)
 		);

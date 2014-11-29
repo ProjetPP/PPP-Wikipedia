@@ -18,7 +18,9 @@ use PPP\Module\TreeSimplifier\NodeSimplifierFactory;
 class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 
 	public function buildSimplifier() {
-		$mediawikiApiMock = $this->getMock('Mediawiki\Api\MediawikiApi', array(), array(''));
+		$mediawikiApiMock = $this->getMockBuilder('Mediawiki\Api\MediawikiApi')
+			->disableOriginalConstructor()
+			->getMock();
 		$mediawikiApiMock->expects($this->any())
 			->method('getAction')
 			->willReturn(array(
