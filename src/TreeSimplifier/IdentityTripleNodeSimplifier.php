@@ -2,14 +2,15 @@
 
 namespace PPP\Wikipedia\TreeSimplifier;
 
+use InvalidArgumentException;
 use Mediawiki\Api\MediawikiApi;
 use PPP\DataModel\AbstractNode;
 use PPP\DataModel\MissingNode;
 use PPP\DataModel\ResourceListNode;
+use PPP\DataModel\ResourceNode;
 use PPP\DataModel\StringResourceNode;
 use PPP\DataModel\TripleNode;
-use PPP\Module\TreeSimplifier\AbstractTripleNodeSimplifier;
-use PPP\Module\TreeSimplifier\NodeSimplifierFactory;
+use PPP\Module\TreeSimplifier\NodeSimplifier;
 
 /**
  * Simplifies triples with identity predicate
@@ -17,7 +18,7 @@ use PPP\Module\TreeSimplifier\NodeSimplifierFactory;
  * @licence GPLv2+
  * @author Thomas Pellissier Tanon
  */
-class IdentityTripleNodeSimplifier extends AbstractTripleNodeSimplifier {
+class IdentityTripleNodeSimplifier implements NodeSimplifier {
 
 	/**
 	 * @var MediawikiApi
@@ -25,34 +26,39 @@ class IdentityTripleNodeSimplifier extends AbstractTripleNodeSimplifier {
 	private $mediawikiApi;
 
 	/**
-	 * @param NodeSimplifierFactory $simplifierFactory
 	 * @param MediawikiApi $mediawikiApi
 	 */
-	public function __construct(NodeSimplifierFactory $simplifierFactory, MediawikiApi $mediawikiApi) {
+	public function __construct(MediawikiApi $mediawikiApi) {
 		$this->mediawikiApi = $mediawikiApi;
-
-		parent::__construct($simplifierFactory);
 	}
 
 	/**
 	 * @see NodeSimplifier::isSimplifierFor
 	 */
 	public function isSimplifierFor(AbstractNode $node) {
-		return $node instanceof TripleNode && $node->getObject() instanceof MissingNode;
+		return $node instanceof TripleNode &&
+		$node->getSubject() instanceof ResourceListNode &&
+		$node->getPredicate() instanceof ResourceListNode &&
+		$node->getObject() instanceof MissingNode;
 	}
 
 	/**
-	 * @see AbstractTripleNodeSimplifier::doSimplification
-	 * @param ResourceListNode $subjects
-	 * @param ResourceListNode $predicates
-	 * @param MissingNode $objects
+	 * @see NodeSimplifier::doSimplification
 	 */
-	protected function doSimplification(AbstractNode $subjects, AbstractNode $predicates, AbstractNode $objects) {
-		if(!$this->isPredicateIdentity($predicates)) {
-			return new TripleNode($subjects, $predicates, $objects);
+	public function simplify(AbstractNode $node) {
+		if(!$this->isSimplifierFor($node)) {
+			throw new InvalidArgumentException('IdentityTripleNodeSimplifier can only simplify TripleNode with a missing object');
 		}
 
-		return $this->getDescriptionsForSubjects($subjects);
+		return $this->doSimplification($node);
+	}
+
+	private function doSimplification(TripleNode $node) {
+		if(!$this->isPredicateIdentity($node->getPredicate())) {
+			return $node;
+		}
+
+		return $this->getDescriptionsForSubjects($node->getSubject());
 	}
 
 	protected function isPredicateIdentity(ResourceListNode $predicates) {
@@ -60,6 +66,7 @@ class IdentityTripleNodeSimplifier extends AbstractTripleNodeSimplifier {
 			return false;
 		}
 
+		/** @var ResourceNode $predicate */
 		foreach($predicates as $predicate) {
 			return strtolower($predicate->getValue()) === 'identity';
 		}
@@ -86,6 +93,7 @@ class IdentityTripleNodeSimplifier extends AbstractTripleNodeSimplifier {
 	protected function buildTitlesString(ResourceListNode $subjects) {
 		$titles = array();
 
+		/** @var ResourceNode $subject */
 		foreach($subjects as $subject) {
 			$titles[] = $subject->getValue();
 		}

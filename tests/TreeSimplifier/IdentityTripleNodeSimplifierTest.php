@@ -7,7 +7,6 @@ use PPP\DataModel\ResourceListNode;
 use PPP\DataModel\StringResourceNode;
 use PPP\DataModel\TripleNode;
 use PPP\Module\TreeSimplifier\NodeSimplifierBaseTest;
-use PPP\Module\TreeSimplifier\NodeSimplifierFactory;
 
 /**
  * @covers PPP\Wikipedia\TreeSimplifier\IdentityTripleNodeSimplifier
@@ -35,10 +34,7 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 			));
 
 
-		return new IdentityTripleNodeSimplifier(
-			new NodeSimplifierFactory(),
-			$mediawikiApiMock
-		);
+		return new IdentityTripleNodeSimplifier($mediawikiApiMock);
 	}
 
 	/**
@@ -48,14 +44,7 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 		return array(
 			array(
 				new TripleNode(
-					new StringResourceNode('Foo'),
-					new StringResourceNode('Identity'),
-					new MissingNode()
-				)
-			),
-			array(
-				new TripleNode(
-					new StringResourceNode('Foo'),
+					new ResourceListNode(array(new StringResourceNode('Foo'))),
 					new ResourceListNode(array(new StringResourceNode('Identity'))),
 					new MissingNode()
 				)
@@ -74,15 +63,15 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 			array(
 				new TripleNode(
 					new MissingNode(),
-					new StringResourceNode('foo'),
-					new StringResourceNode('bar')
+					new ResourceListNode(array(new StringResourceNode('foo'))),
+					new ResourceListNode(array(new StringResourceNode('bar')))
 				)
 			),
 			array(
 				new TripleNode(
-					new StringResourceNode('foo'),
+					new ResourceListNode(array(new StringResourceNode('foo'))),
 					new MissingNode(),
-					new StringResourceNode('bar')
+					new ResourceListNode(array(new StringResourceNode('bar')))
 				)
 			),
 		);
@@ -93,8 +82,8 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 			array(
 				new ResourceListNode(array(new StringResourceNode('bar'))),
 				new TripleNode(
-					new StringResourceNode('Foo'),
-					new StringResourceNode('Identity'),
+					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Identity'))),
 					new MissingNode()
 				)
 			),
@@ -105,8 +94,8 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 					new MissingNode()
 				),
 				new TripleNode(
-					new StringResourceNode('Foo'),
-					new StringResourceNode('Identities'),
+					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Identities'))),
 					new MissingNode()
 				)
 			),

@@ -5,11 +5,11 @@ namespace PPP\Wikipedia;
 use Mediawiki\Api\MediawikiApi;
 use PPP\DataModel\AbstractNode;
 use PPP\DataModel\ResourceListNode;
-use PPP\DataModel\ResourceNode;
 use PPP\Module\AbstractRequestHandler;
 use PPP\Module\DataModel\ModuleRequest;
 use PPP\Module\DataModel\ModuleResponse;
-use PPP\Wikipedia\TreeSimplifier\WikipediaNodeSimplifierFactory;
+use PPP\Module\TreeSimplifier\NodeSimplifierFactory;
+use PPP\Wikipedia\TreeSimplifier\IdentityTripleNodeSimplifier;
 
 /**
  * Module entry point.
@@ -29,38 +29,25 @@ class WikipediaRequestHandler extends AbstractRequestHandler {
 		if(!in_array($request->getLanguageCode(), self::$ALLOWED_LANGUAGES)) {
 			return array();
 		}
-		$treeSimplifier = new WikipediaNodeSimplifierFactory($this->getApiForLanguage($request->getLanguageCode()));
-		$simplifiedTrees = $this->toOldRepresentation($treeSimplifier->newNodeSimplifier()->simplify($request->getSentenceTree()));
 
-		$responses = array();
-		foreach($simplifiedTrees as $tree) {
-			$responses[] = new ModuleResponse(
-				$request->getLanguageCode(),
-				$tree,
-				$this->buildMeasures($tree, $request->getMeasures())
-			);
-		}
+		$treeSimplifier = new NodeSimplifierFactory(array(
+			new IdentityTripleNodeSimplifier($this->getApiForLanguage($request->getLanguageCode()))
+		));
+		$simplifiedTree = $treeSimplifier->newNodeSimplifier()->simplify($request->getSentenceTree());
 
-		return $responses;
+		return array(new ModuleResponse(
+			$request->getLanguageCode(),
+			$simplifiedTree,
+			$this->buildMeasures($simplifiedTree, $request->getMeasures())
+		));
 	}
 
 	private function buildMeasures(AbstractNode $node, array $measures) {
-		if($node instanceof ResourceNode) {
+		if($node instanceof ResourceListNode) {
 			$measures['relevance'] = 1;
 		}
 
 		return $measures;
-	}
-
-	/**
-	 * @todo move to new representation
-	 */
-	private function toOldRepresentation(AbstractNode $node) {
-		if($node instanceof ResourceListNode) {
-			return iterator_to_array($node);
-		} else {
-			return array($node);
-		}
 	}
 
 	private function getApiForLanguage($languageCode) {
