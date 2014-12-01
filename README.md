@@ -15,7 +15,7 @@ It currently only answers to the queries under the format `(*, identity, ?)`.
 
     git clone https://github.com/ProjetPP/PPP-Wikipedia.git
 
-2 - Install dependances with composer:
+2 - Install dependencies with composer:
 
     curl -sS https://getcomposer.org/installer | php
     php composer.phar install
