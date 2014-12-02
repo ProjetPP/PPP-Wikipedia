@@ -79,7 +79,8 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 			'redirects' => true,
 			'exintro' => true,
 			'exsectionformat' => 'plain',
-			'explaintext' => true
+			'explaintext' => true,
+			'exsentences' => 3
 		));
 
 		$descriptions = array();
