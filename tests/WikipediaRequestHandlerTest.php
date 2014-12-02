@@ -71,6 +71,20 @@ class WikipediaRequestHandlerTest extends \PHPUnit_Framework_TestCase {
 					)
 				)),
 			),
+			array(
+				new ModuleRequest(
+					'en',
+					new SentenceNode('Newton'),
+					'a'
+				),
+				array(new ModuleResponse(
+					'en',
+					new ResourceListNode(),
+					array(
+						'relevance' => 1
+					)
+				)),
+			),
 		);
 	}
 }

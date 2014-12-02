@@ -54,7 +54,7 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 		}
 
 		if($node instanceof SentenceNode) {
-			return $this->getDescriptionsForSubjects(new ResourceListNode(array(new StringResourceNode($node->getValue()))));
+			return $this->getDescriptionsForSubjects($this->filterDisambiguation(array($node->getValue())));
 		} else {
 			return $this->doSimplification($node);
 		}
@@ -65,7 +65,11 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 			return $node;
 		}
 
-		return $this->getDescriptionsForSubjects($node->getSubject());
+		return $this->getDescriptionsForSubjects(
+			$this->filterDisambiguation(
+				$this->resourceListToStringArray($node->getSubject())
+			)
+		);
 	}
 
 	protected function isPredicateIdentity(ResourceListNode $predicates) {
@@ -77,9 +81,34 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 		return strtolower($predicates->getIterator()->current()->getValue()) === 'identity';
 	}
 
-	protected function getDescriptionsForSubjects(ResourceListNode $subjects) {
+	protected function filterDisambiguation(array $titles) {
 		$result = $this->mediawikiApi->getAction('query', array(
-			'titles' => $this->buildTitlesString($subjects),
+			'titles' => implode('|', $titles),
+			'prop' => 'pageprops',
+			'redirects' => true,
+			'ppprop' => 'disambiguation'
+		));
+
+		$filteredTitles = array();
+		foreach($result['query']['pages'] as $pageResult) {
+			if(
+				!array_key_exists('pageprops', $pageResult) ||
+				!array_key_exists('disambiguation', $pageResult['pageprops'])
+			) {
+				$filteredTitles[] = $pageResult['title'];
+			}
+		}
+
+		return $filteredTitles;
+	}
+
+	protected function getDescriptionsForSubjects(array $titles) {
+		if(empty($titles)) {
+			return new ResourceListNode();
+		}
+
+		$result = $this->mediawikiApi->getAction('query', array(
+			'titles' => implode('|', $titles),
 			'prop' => 'extracts',
 			'redirects' => true,
 			'exintro' => true,
@@ -96,13 +125,14 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 		return new ResourceListNode($descriptions);
 	}
 
-	protected function buildTitlesString(ResourceListNode $subjects) {
+	protected function resourceListToStringArray(ResourceListNode $subjects) {
 		$titles = array();
 
 		/** @var ResourceNode $subject */
 		foreach($subjects as $subject) {
 			$titles[] = $subject->getValue();
 		}
-		return implode('|', $titles);
+
+		return $titles;
 	}
 }

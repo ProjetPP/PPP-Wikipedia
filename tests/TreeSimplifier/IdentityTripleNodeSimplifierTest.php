@@ -2,6 +2,7 @@
 
 namespace PPP\Wikipedia\TreeSimplifier;
 
+use Mediawiki\Api\MediawikiApi;
 use PPP\DataModel\MissingNode;
 use PPP\DataModel\ResourceListNode;
 use PPP\DataModel\SentenceNode;
@@ -18,24 +19,7 @@ use PPP\Module\TreeSimplifier\NodeSimplifierBaseTest;
 class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 
 	public function buildSimplifier() {
-		$mediawikiApiMock = $this->getMockBuilder('Mediawiki\Api\MediawikiApi')
-			->disableOriginalConstructor()
-			->getMock();
-		$mediawikiApiMock->expects($this->any())
-			->method('getAction')
-			->willReturn(array(
-				'query' => array(
-					'pages' => array(
-						'1' => array(
-							'title' => 'Foo',
-							'extract' => 'bar'
-						)
-					)
-				)
-			));
-
-
-		return new IdentityTripleNodeSimplifier($mediawikiApiMock);
+		return new IdentityTripleNodeSimplifier(new MediawikiApi('http://fr.wikipedia.org/w/api.php'));
 	}
 
 	/**
@@ -45,13 +29,13 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 		return array(
 			array(
 				new TripleNode(
-					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Léon de la Brière'))),
 					new ResourceListNode(array(new StringResourceNode('Identity'))),
 					new MissingNode()
 				)
 			),
 			array(
-				new SentenceNode('Foo')
+				new SentenceNode('Léon de la Brière')
 			)
 		);
 	}
@@ -84,25 +68,25 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 	public function simplificationProvider() {
 		return array(
 			array(
-				new ResourceListNode(array(new StringResourceNode('bar'))),
-				new SentenceNode('Foo')
+				new ResourceListNode(array(new StringResourceNode('Léon Leroy de la Brière (14 janvier 1845 - 12 septembre 1899) est un écrivain politique français de la fin du XIXe siècle.'))),
+				new SentenceNode('Léon de la Brière')
 			),
 			array(
-				new ResourceListNode(array(new StringResourceNode('bar'))),
+				new ResourceListNode(array(new StringResourceNode('Léon Leroy de la Brière (14 janvier 1845 - 12 septembre 1899) est un écrivain politique français de la fin du XIXe siècle.'))),
 				new TripleNode(
-					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Léon de la Brière'))),
 					new ResourceListNode(array(new StringResourceNode('Identity'))),
 					new MissingNode()
 				)
 			),
 			array(
 				new TripleNode(
-					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Léon de la Brière'))),
 					new ResourceListNode(array(new StringResourceNode('Identities'))),
 					new MissingNode()
 				),
 				new TripleNode(
-					new ResourceListNode(array(new StringResourceNode('Foo'))),
+					new ResourceListNode(array(new StringResourceNode('Léon de la Brière'))),
 					new ResourceListNode(array(new StringResourceNode('Identities'))),
 					new MissingNode()
 				)
