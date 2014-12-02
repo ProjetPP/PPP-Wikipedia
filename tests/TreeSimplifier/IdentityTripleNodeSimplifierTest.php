@@ -4,6 +4,7 @@ namespace PPP\Wikipedia\TreeSimplifier;
 
 use PPP\DataModel\MissingNode;
 use PPP\DataModel\ResourceListNode;
+use PPP\DataModel\SentenceNode;
 use PPP\DataModel\StringResourceNode;
 use PPP\DataModel\TripleNode;
 use PPP\Module\TreeSimplifier\NodeSimplifierBaseTest;
@@ -49,6 +50,9 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 					new MissingNode()
 				)
 			),
+			array(
+				new SentenceNode('Foo')
+			)
 		);
 	}
 
@@ -79,6 +83,10 @@ class IdentityTripleNodeSimplifierTest extends NodeSimplifierBaseTest {
 
 	public function simplificationProvider() {
 		return array(
+			array(
+				new ResourceListNode(array(new StringResourceNode('bar'))),
+				new SentenceNode('Foo')
+			),
 			array(
 				new ResourceListNode(array(new StringResourceNode('bar'))),
 				new TripleNode(

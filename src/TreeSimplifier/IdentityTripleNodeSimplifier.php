@@ -8,12 +8,13 @@ use PPP\DataModel\AbstractNode;
 use PPP\DataModel\MissingNode;
 use PPP\DataModel\ResourceListNode;
 use PPP\DataModel\ResourceNode;
+use PPP\DataModel\SentenceNode;
 use PPP\DataModel\StringResourceNode;
 use PPP\DataModel\TripleNode;
 use PPP\Module\TreeSimplifier\NodeSimplifier;
 
 /**
- * Simplifies triples with identity predicate
+ * Simplifies triples with identity predicate or sentence nodes
  *
  * @licence GPLv2+
  * @author Thomas Pellissier Tanon
@@ -36,10 +37,12 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 	 * @see NodeSimplifier::isSimplifierFor
 	 */
 	public function isSimplifierFor(AbstractNode $node) {
-		return $node instanceof TripleNode &&
-		$node->getSubject() instanceof ResourceListNode &&
-		$node->getPredicate() instanceof ResourceListNode &&
-		$node->getObject() instanceof MissingNode;
+		return $node instanceof SentenceNode || (
+			$node instanceof TripleNode &&
+			$node->getSubject() instanceof ResourceListNode &&
+			$node->getPredicate() instanceof ResourceListNode &&
+			$node->getObject() instanceof MissingNode
+		);
 	}
 
 	/**
@@ -50,7 +53,11 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 			throw new InvalidArgumentException('IdentityTripleNodeSimplifier can only simplify TripleNode with a missing object');
 		}
 
-		return $this->doSimplification($node);
+		if($node instanceof SentenceNode) {
+			return $this->getDescriptionsForSubjects(new ResourceListNode(array(new StringResourceNode($node->getValue()))));
+		} else {
+			return $this->doSimplification($node);
+		}
 	}
 
 	private function doSimplification(TripleNode $node) {
@@ -66,10 +73,8 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 			return false;
 		}
 
-		/** @var ResourceNode $predicate */
-		foreach($predicates as $predicate) {
-			return strtolower($predicate->getValue()) === 'identity';
-		}
+		/** @var ResourceNode $resource */
+		return strtolower($predicates->getIterator()->current()->getValue()) === 'identity';
 	}
 
 	protected function getDescriptionsForSubjects(ResourceListNode $subjects) {
