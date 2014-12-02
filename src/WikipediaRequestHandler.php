@@ -34,6 +34,9 @@ class WikipediaRequestHandler extends AbstractRequestHandler {
 			new IdentityTripleNodeSimplifier($this->getApiForLanguage($request->getLanguageCode()))
 		));
 		$simplifiedTree = $treeSimplifier->newNodeSimplifier()->simplify($request->getSentenceTree());
+		if($simplifiedTree->equals(new ResourceListNode())) {
+			return array();
+		}
 
 		return array(new ModuleResponse(
 			$request->getLanguageCode(),

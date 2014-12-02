@@ -77,13 +77,7 @@ class WikipediaRequestHandlerTest extends \PHPUnit_Framework_TestCase {
 					new SentenceNode('Newton'),
 					'a'
 				),
-				array(new ModuleResponse(
-					'en',
-					new ResourceListNode(),
-					array(
-						'relevance' => 1
-					)
-				)),
+				array(),
 			),
 		);
 	}
