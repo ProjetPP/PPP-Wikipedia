@@ -54,13 +54,19 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 		}
 
 		if($node instanceof SentenceNode) {
-			return $this->getDescriptionsForSubjects($this->filterDisambiguation(array($node->getValue())));
+			return $this->doSimplificationForSentence($node);
+		} else if($node instanceof TripleNode) {
+			return $this->doSimplificationForTriple($node);
 		} else {
-			return $this->doSimplification($node);
+			return $node;
 		}
 	}
 
-	private function doSimplification(TripleNode $node) {
+	private function doSimplificationForSentence(SentenceNode $node) {
+		return $this->getDescriptionsForSubjects($this->filterDisambiguation(array($node->getValue())));
+	}
+
+	private function doSimplificationForTriple(TripleNode $node) {
 		if(!$this->isPredicateIdentity($node->getPredicate())) {
 			return $node;
 		}
@@ -90,10 +96,10 @@ class IdentityTripleNodeSimplifier implements NodeSimplifier {
 		));
 
 		$filteredTitles = array();
-		foreach($result['query']['pages'] as $pageResult) {
+		foreach($result['query']['pages'] as $id => $pageResult) {
 			if(
-				!array_key_exists('pageprops', $pageResult) ||
-				!array_key_exists('disambiguation', $pageResult['pageprops'])
+				$id > 0 &&
+				(!array_key_exists('pageprops', $pageResult) || !array_key_exists('disambiguation', $pageResult['pageprops']))
 			) {
 				$filteredTitles[] = $pageResult['title'];
 			}

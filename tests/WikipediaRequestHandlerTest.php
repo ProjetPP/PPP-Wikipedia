@@ -79,6 +79,14 @@ class WikipediaRequestHandlerTest extends \PHPUnit_Framework_TestCase {
 				),
 				array(),
 			),
+			array(
+				new ModuleRequest(
+					'en',
+					new SentenceNode('Who is Obama'),
+					'a'
+				),
+				array(),
+			),
 		);
 	}
 }
